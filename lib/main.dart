@@ -49,12 +49,12 @@ class _NavigationScreenState extends State<NavigationScreen> {
   // Modify _widgetOptions to use a Navigator for the MapScreen tab
   List<Widget> _widgetOptions(BuildContext context) => [
         const HomeScreen(),
-        //const EmergencyScreen(),
-        const Text("Emergency"),
-        const Text("Mapa"),
-        const Text("Contactos"),
+        const EmergencyScreen(),
+        //const Text("Emergency"),
+        //const Text("Mapa"),
+        //const Text("Contactos"),
         // Navigator for the MapScreen tab
-        /* Navigator(
+        Navigator(
           key: _mapNavigatorKey,
           initialRoute: 'mapScreen',
           onGenerateRoute: (RouteSettings settings) {
@@ -72,8 +72,8 @@ class _NavigationScreenState extends State<NavigationScreen> {
             }
             return MaterialPageRoute(builder: builder, settings: settings);
           },
-        ),*/
-        /*Navigator(
+        ),
+        Navigator(
           key: _contactNavigatorKey,
           initialRoute: 'EmergencyContactScreen',
           onGenerateRoute: (RouteSettings settings) {
@@ -91,7 +91,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
             }
             return MaterialPageRoute(builder: builder, settings: settings);
           },
-        ),*/
+        ),
       ];
 
   void _onItemTapped(int index) {
