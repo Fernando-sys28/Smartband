@@ -6,9 +6,23 @@ import 'package:smart_band_project/EmergencyScreen.dart';
 import 'package:smart_band_project/HomeScreen.dart';
 import 'package:smart_band_project/MapScreen.dart';
 
+import 'package:permission_handler/permission_handler.dart';
+
+class PermissionsService {
+  Future<void> requestPermissions() async {
+    await [
+      Permission.locationWhenInUse,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+    ].request();
+  }
+}
+
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  PermissionsService().requestPermissions();
+
   setup();
   runApp(const MyApp());
 }
@@ -84,7 +98,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                     contactNavigatorKey: _contactNavigatorKey);
                 break;
               case 'AddContactScreen':
-                builder = (BuildContext context) => const AddContactScreen();
+                builder = (BuildContext context) => AddContactScreen();
                 break;
               default:
                 throw Exception('Invalid route: ${settings.name}');

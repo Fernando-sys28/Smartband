@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart' as loc;
+import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:async';
 
 class MapScreen extends StatefulWidget {
   final GlobalKey<NavigatorState> mapNavigatorKey;
@@ -11,12 +15,76 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
+  final FlutterTts flutterTts = FlutterTts();
   late GoogleMapController mapController;
-  final LatLng _center = const LatLng(
-      19.054960398387607, -98.28450967485462); // Default to Googleplex
+  loc.Location location =
+      loc.Location(); // Use the location with the 'loc' alias
+  LatLng _currentLocation = LatLng(0, 0); // Default location
+  Timer? _timer;
+  int _currentStep = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  void _startAutoNavigation() {
+    const delay = Duration(seconds: 4);
+    _timer = Timer.periodic(delay, (Timer t) {
+      if (_currentStep == 0) {
+        _speak("Estas son tus direcciones guardadas");
+      } else if (_currentStep == 1) {
+        _speak("Tienes dos direcciones, casa y trabajo");
+      } else if (_currentStep == 2) {
+        _speak(
+            "Para poder ayudarte a llegar a tu destino di: DevBand llegar mas tu direccion guardada y para añadir una direccion di: Devband añadir direccion");
+      }
+      _currentStep++;
+      if (_currentStep > 2) t.cancel();
+    });
+  }
+
+  void _getLocationAndSpeak() async {
+    var currentLocation = await location.getLocation();
+    _currentLocation =
+        LatLng(currentLocation.latitude!, currentLocation.longitude!);
+    mapController.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: _currentLocation,
+          zoom: 15.0,
+        ),
+      ),
+    );
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        _currentLocation.latitude, _currentLocation.longitude);
+
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      String displayName = '${place.locality}, ${place.country}';
+      _speak("Estás en la pestaña de Mapa, ubicación actual: $displayName");
+      _startAutoNavigation();
+    } else {
+      _speak("Estás en la pestaña de Mapa, ubicación actual no disponible");
+    }
+  }
+
+  void _speak(String message) async {
+    await flutterTts.setLanguage("es-ES");
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(message);
+  }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    _getLocationAndSpeak();
   }
 
   @override
@@ -38,7 +106,7 @@ class _MapScreenState extends State<MapScreen> {
             child: GoogleMap(
               onMapCreated: _onMapCreated,
               initialCameraPosition: CameraPosition(
-                target: _center,
+                target: _currentLocation,
                 zoom: 15.0,
               ),
               myLocationEnabled: true,
@@ -47,7 +115,7 @@ class _MapScreenState extends State<MapScreen> {
           const ListTile(
             title: Text(
               'Direcciones',
-              style: TextStyle(fontSize: 18, color: Colors.black),
+              style: TextStyle(fontSize: 22, color: Colors.black),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +129,7 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 160),
+          const SizedBox(height: 140),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Row(
@@ -69,6 +137,7 @@ class _MapScreenState extends State<MapScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
+                    _speak("añadir direccion");
                     widget.mapNavigatorKey.currentState
                         ?.pushNamed('addAddress');
                   },
@@ -80,7 +149,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Add your onPressed functionality here
+                    _speak("Historial de rutas");
                   },
                   child: const Text('Historial rutas'),
                   style: ElevatedButton.styleFrom(

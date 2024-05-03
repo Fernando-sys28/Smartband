@@ -41,6 +41,16 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<key>NSBluetoothPeripheralUsageDescription</key>
+		<string>Need Bluetooth access to connect to devices</string>
+		<key>NSBluetoothAlwaysUsageDescription</key>
+		<string>App requires Bluetooth to find, connect and transfer data with nearby devices</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>This app needs access to location when open to scan for Bluetooth devices.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Need location access to show on the map</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>Need location access to show on the map</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
